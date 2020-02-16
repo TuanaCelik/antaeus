@@ -1,9 +1,8 @@
 package io.pleo.antaeus.core.services
 
 import io.pleo.antaeus.core.external.PaymentProvider
-
+import io.pleo.antaeus.core.exceptions.*
 import io.pleo.antaeus.data.AntaeusDal
-
 import io.pleo.antaeus.models.*
 
 import kotlin.text.*
@@ -22,22 +21,35 @@ class BillingService(
         }
     }
 
-    private  fun processInvoice(invoice: Invoice) : Boolean
+    private  fun processInvoice(invoice: Invoice)
     {
         val status = invoice.status
+        val customer = invoice.customerId
+        val invoiceId = invoice.id
+
         if(status == InvoiceStatus.PENDING)
         {
-            if(paymentProvider.charge(invoice))
-            {
-                println("$invoice WAS SUCCESSFULLY PAID")
-                dal.setInvoiceStatus(id = invoice.id, newStatus = InvoiceStatus.PAID)
+            try {
+                if (paymentProvider.charge(invoice)) {
+                    println("CUSTOMER $customer PAID INVOICE $invoiceId SUCCESSFULLY..")
+                    dal.setInvoiceStatus(id = invoice.id, newStatus = InvoiceStatus.PAID)
+                } else {
+                    println("$customer COULD NOT PAY INVOICE $invoiceId DUE TO LACK OF FUNDS, TRYING AGAIN..")
+                }
             }
-            else{
-                println("$invoice COULD NOT BE PAID")
+            catch(e: CustomerNotFoundException)
+            {
+                println("CustomerNotFoundException: $e")
+            }
+            catch(e: CurrencyMismatchException)
+            {
+                println("CurrencyMismatchException: $e")
+            }
+            catch(e: NetworkException)
+            {
+                println("NetworkException: $e")
             }
         }
-
-        return true;
     }
 
 }
