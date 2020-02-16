@@ -79,3 +79,23 @@ The code given is structured as follows. Feel free however to modify the structu
 * [Sqlite3](https://sqlite.org/index.html) - Database storage engine
 
 Happy hacking 😁!
+
+
+### Notes On My Solution
+*BillingService*
+This service is only responsible of processing an invoice
+* processUnpaidInvoices: gets unpaid invoices from the database and calls processInvoice on them
+* processInvoice: Will perform check that the invoice is indeed PENDING and if charge is successful set the status to PAID
+
+*ScheduleService*
+This service will check whether the date matcher the payment date and call the billingService.processUnpaidInvoices() if it does 
+
+*AntaeusApp*
+This is where I hand the responsibility of setting the payment day (now set to 1st of month)
+From there the setup of the ScheduleService is done
+
+*AntaeusRest*
+The only addition here is to call the scheduler when the app starts
+
+*AntaeusDal*
+The only addition here is a function that returns all the unpaid invoices
