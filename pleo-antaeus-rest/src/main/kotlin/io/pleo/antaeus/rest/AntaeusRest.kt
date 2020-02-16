@@ -10,32 +10,21 @@ import io.javalin.apibuilder.ApiBuilder.path
 import io.pleo.antaeus.core.exceptions.EntityNotFoundException
 import io.pleo.antaeus.core.services.CustomerService
 import io.pleo.antaeus.core.services.InvoiceService
-import io.pleo.antaeus.core.services.BillingService
+import io.pleo.antaeus.core.services.ScheduleService
 
 import mu.KotlinLogging
-
-import java.time.LocalDateTime
 
 private val logger = KotlinLogging.logger {}
 
 class AntaeusRest (
     private val invoiceService: InvoiceService,
     private val customerService: CustomerService,
-    private val billingService: BillingService
+    private val scheduleService: ScheduleService
 ) : Runnable {
 
     override fun run() {
         app.start(7000)
-        while(true)
-        {
-            val PAYMENT_DAY = 1
-            val day = LocalDateTime.now().getDayOfMonth()
-
-            if (day == PAYMENT_DAY)
-            {
-               billingService.processUnpaidInvoices()
-            }
-        }
+        scheduleService.schedule()
     }
 
     // Set up Javalin rest app
