@@ -39,6 +39,14 @@ class AntaeusDal(private val db: Database) {
         }
     }
 
+    fun fetchUnpaidInvoices(): List<Invoice> {
+        return transaction(db) {
+            InvoiceTable
+                    .select{InvoiceTable.status.eq(InvoiceStatus.PENDING.toString())}
+                    .map { it.toInvoice() }
+        }
+    }
+
     fun setInvoiceStatus(id: Int, newStatus: InvoiceStatus){
         val id = transaction(db) {
             // updates invoice with matching id with new status.

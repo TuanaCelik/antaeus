@@ -12,11 +12,10 @@ class BillingService(
     private val dal: AntaeusDal
 )
 {
-
-    public fun processAllInvoices()
+    public fun processUnpaidInvoices()
     {
-        val invoices = dal.fetchInvoices()
-        invoices.forEach{
+        val unpaidInvoices = dal.fetchUnpaidInvoices()
+        unpaidInvoices.forEach{
             processInvoice(invoice = it)
         }
     }
@@ -34,7 +33,7 @@ class BillingService(
                     println("CUSTOMER $customer PAID INVOICE $invoiceId SUCCESSFULLY..")
                     dal.setInvoiceStatus(id = invoice.id, newStatus = InvoiceStatus.PAID)
                 } else {
-                    println("$customer COULD NOT PAY INVOICE $invoiceId DUE TO LACK OF FUNDS, TRYING AGAIN..")
+                    println("CUSTOMER $customer COULD NOT PAY INVOICE $invoiceId DUE TO LACK OF FUNDS, TRYING AGAIN..")
                 }
             }
             catch(e: CustomerNotFoundException)

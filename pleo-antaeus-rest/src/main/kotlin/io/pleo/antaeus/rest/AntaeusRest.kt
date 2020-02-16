@@ -28,12 +28,12 @@ class AntaeusRest (
         app.start(7000)
         while(true)
         {
-            val PAYMENT_DAY = 16
+            val PAYMENT_DAY = 1
             val day = LocalDateTime.now().getDayOfMonth()
 
             if (day == PAYMENT_DAY)
             {
-               billingService.processAllInvoices()
+               billingService.processUnpaidInvoices()
             }
         }
     }
