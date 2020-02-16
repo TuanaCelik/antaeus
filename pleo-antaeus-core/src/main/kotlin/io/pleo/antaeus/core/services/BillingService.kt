@@ -6,8 +6,6 @@ import io.pleo.antaeus.data.AntaeusDal
 
 import io.pleo.antaeus.models.*
 
-import java.time.LocalDateTime
-
 import kotlin.text.*
 
 class BillingService(
@@ -15,18 +13,13 @@ class BillingService(
     private val dal: AntaeusDal
 )
 {
-    init {
-        val PAYMENT_DAY = 16
-        val day = LocalDateTime.now().getDayOfMonth()
 
-        if (day == PAYMENT_DAY)
-        {
-            val invoices = dal.fetchInvoices()
-            invoices.forEach{
-                processInvoice(invoice = it)
-            }
+    public fun processAllInvoices()
+    {
+        val invoices = dal.fetchInvoices()
+        invoices.forEach{
+            processInvoice(invoice = it)
         }
-
     }
 
     private  fun processInvoice(invoice: Invoice) : Boolean
@@ -34,7 +27,14 @@ class BillingService(
         val status = invoice.status
         if(status == InvoiceStatus.PENDING)
         {
-            println("processing invoce: $invoice")
+            if(paymentProvider.charge(invoice))
+            {
+                println("$invoice WAS SUCCESSFULLY PAID")
+                dal.setInvoiceStatus(id = invoice.id, newStatus = InvoiceStatus.PAID)
+            }
+            else{
+                println("$invoice COULD NOT BE PAID")
+            }
         }
 
         return true;

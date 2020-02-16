@@ -14,6 +14,8 @@ import io.pleo.antaeus.core.services.BillingService
 
 import mu.KotlinLogging
 
+import java.time.LocalDateTime
+
 private val logger = KotlinLogging.logger {}
 
 class AntaeusRest (
@@ -26,6 +28,13 @@ class AntaeusRest (
         app.start(7000)
         while(true)
         {
+            val PAYMENT_DAY = 16
+            val day = LocalDateTime.now().getDayOfMonth()
+
+            if (day == PAYMENT_DAY)
+            {
+               billingService.processAllInvoices()
+            }
         }
     }
 
