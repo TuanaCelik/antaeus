@@ -16,11 +16,15 @@ class BillingService(
     {
         val unpaidInvoices = dal.fetchUnpaidInvoices()
         unpaidInvoices.forEach{
-            processInvoice(invoice = it)
+            try{
+                processInvoice(invoice = it)
+            } catch (e :LackOfFundsException) {
+                println(e)
+            }
         }
     }
 
-    private  fun processInvoice(invoice: Invoice)
+    public  fun processInvoice(invoice: Invoice): Invoice?
     {
         val status = invoice.status
         val customer = invoice.customerId
@@ -28,27 +32,14 @@ class BillingService(
 
         if(status == InvoiceStatus.PENDING)
         {
-            try {
-                if (paymentProvider.charge(invoice)) {
-                    println("CUSTOMER $customer PAID INVOICE $invoiceId SUCCESSFULLY..")
-                    dal.setInvoiceStatus(id = invoice.id, newStatus = InvoiceStatus.PAID)
-                } else {
-                    println("CUSTOMER $customer COULD NOT PAY INVOICE $invoiceId DUE TO LACK OF FUNDS, TRYING AGAIN..")
-                }
-            }
-            catch(e: CustomerNotFoundException)
-            {
-                println("CustomerNotFoundException: $e")
-            }
-            catch(e: CurrencyMismatchException)
-            {
-                println("CurrencyMismatchException: $e")
-            }
-            catch(e: NetworkException)
-            {
-                println("NetworkException: $e")
+            if (paymentProvider.charge(invoice)) {
+                println("CUSTOMER $customer PAID INVOICE $invoiceId SUCCESSFULLY..")
+                return dal.setInvoiceStatus(invoice = invoice, newStatus = InvoiceStatus.PAID)
+            } else {
+                throw LackOfFundsException(invoiceId, customer)
             }
         }
+        return invoice
     }
 
 }
