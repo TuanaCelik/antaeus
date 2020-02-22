@@ -91,7 +91,7 @@ This service is only responsible of processing an invoice
 
 *ScheduleService*
 
-This service will check whether the date matcher the payment date and call the billingService.processUnpaidInvoices() if it does 
+This service will check whether the date matches the payment date and call the billingService.processUnpaidInvoices() if it does 
 
 
 *AntaeusApp*
@@ -108,3 +108,7 @@ The only addition here is to call the scheduler when the app starts
 *AntaeusDal*
 
 The only addition here is a function that returns all the unpaid invoices
+
+*TESTS*
+
+I've added a simple test that will check whether if a bill is unpayable the correct exception is thrown
